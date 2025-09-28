@@ -1,5 +1,5 @@
 
-#运行命令的格式，在conda创建的rdkit环境中，运行python similarity.py "smiles1" "smiles2" 比如python similarity.py "NC1=C(C(NC2=CC=CC=C2)=O)C=C(CC)S1" "NC1=C(C(NC2=CC=CC=C2)=O)C=C(C3=CC=CC=C3)S1"
+#比较两个小分子的similarity, 使用方法：运行python similarity.py "smiles1" "smiles2"
 
 import sys
 import csv
