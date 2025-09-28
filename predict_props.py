@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#预测单个小分子的物理化学性质。使用方法：输入python predict_props.py, 然后回车，提示输入smiles, 输入smiels后回车，即可在屏幕显示这个小分子的理化性质。
+#预测单个小分子的物理化学性质。使用方法：输入python predict_props.py, 然后回车，根据提示输入smiles, 然后回车，即可在屏幕显示这个小分子的理化性质。
 
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski, QED
