@@ -1,3 +1,4 @@
+
 # 把分子生成程序生成的分子文件 xx.csv 文件中 smiles 那一列的分子转换成 sdf 文件。
 # 使用方法：python convert_csv_to_sdf.py input.csv
 # 不需要写输出文件名称和格式。
@@ -78,6 +79,7 @@ for i, smi in enumerate(df[smiles_col]):
 
 writer.close()
 print(f"✅ 成功导出 {count} 个分子到 {output_sdf}")
+
 
 
 
