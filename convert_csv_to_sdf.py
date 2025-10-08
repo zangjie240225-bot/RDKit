@@ -1,16 +1,19 @@
-
-# 把分子生成程序生成的分子文件 xx.csv 文件中 smiles 那一列的分子转换成 sdf 文件。
-# 使用方法：python convert_csv_to_sdf.py input.csv
-# 不需要写输出文件名称和格式。
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+把分子生成程序的 CSV 转成 SDF（2D、隐式氢，适合后续在 Maestro 里做 LigPrep）
+用法: python convert_csv_to_sdf.py input.csv。缺点是只能识别一列的smiles。
+"""
 
 import sys
 import os
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import rdDepictor
 
+# 参数检查
 if len(sys.argv) != 2:
-    print("用法: python convert_csv_to_sdf.py input.csv ")
+    print("用法: python convert_csv_to_sdf.py input.csv")
     sys.exit(1)
 
 input_csv = sys.argv[1]
@@ -18,13 +21,13 @@ if not os.path.exists(input_csv):
     print(f"❌ 找不到输入文件: {input_csv}")
     sys.exit(1)
 
-# 自动生成输出文件名
+# 输出文件名同名 .sdf
 output_sdf = os.path.splitext(input_csv)[0] + ".sdf"
 
-# 读CSV
+# 读 CSV
 df = pd.read_csv(input_csv)
 
-# 自动检测 SMILES 列
+# 自动检测 SMILES 列（支持 'smiles' 或 'generated_smiles' 等大小写变体）
 smiles_col = None
 for col in df.columns:
     if "smiles" in col.lower():
@@ -32,7 +35,7 @@ for col in df.columns:
         break
 
 if smiles_col is None:
-    print("❌ 没找到 SMILES 列，请确认 CSV 里有 'smiles' 列")
+    print("❌ 没找到 SMILES 列，请确认 CSV 里含有 'smiles' 相关列名")
     sys.exit(1)
 
 writer = Chem.SDWriter(output_sdf)
@@ -47,38 +50,41 @@ for i, smi in enumerate(df[smiles_col]):
         print(f"⚠️ 第{i}行 SMILES 无效: {smi}")
         continue
 
-    mol = Chem.AddHs(mol)
-
-    # 尝试生成构象
-    res = AllChem.EmbedMolecule(mol, AllChem.ETKDG())
-    if res != 0:
-        print(f"⚠️ 第{i}行无法生成3D构象: {smi}")
-        continue
-
+    # 生成 2D 坐标（不加氢，保持隐式氢；更适合在 Maestro 里 LigPrep）
     try:
-        AllChem.UFFOptimizeMolecule(mol)
+        rdDepictor.Compute2DCoords(mol)
     except Exception as e:
-        print(f"⚠️ 第{i}行优化失败: {smi}, 错误: {e}")
+        print(f"⚠️ 第{i}行生成2D坐标失败: {smi}，错误: {e}")
         continue
 
-    # 如果有名字列就用名字，否则用编号
+    # 可选：如 SMILES 中包含显式氢（例如 [H]N），去掉它们以避免 ChemDraw/导入全显氢
+    try:
+        mol = Chem.RemoveHs(mol)
+    except Exception:
+        pass
+
+    # 名称
     name = None
     for col in df.columns:
         if col.lower() in ["name", "id", "title"]:
-            name = str(df[col].iloc[i])
+            name = str(df.at[i, col])
             break
     mol.SetProp("_Name", name if name else f"mol_{i}")
 
-    # 把 CSV 里其他列写入 SDF 属性
+    # 其他列写入 SDF 属性
     for col in df.columns:
-        if col != smiles_col:
-            mol.SetProp(col, str(df[col].iloc[i]))
+        if col == smiles_col:
+            continue
+        val = df.at[i, col]
+        if pd.isna(val):
+            continue
+        mol.SetProp(col, str(val))
 
     writer.write(mol)
     count += 1
 
 writer.close()
-print(f"✅ 成功导出 {count} 个分子到 {output_sdf}")
+print(f"✅ 成功导出 {count} 个分子到 {output_sdf}（2D、隐式氢，建议后续用 LigPrep 生成3D并加氢）")
 
 
 
