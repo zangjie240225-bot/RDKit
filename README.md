@@ -5,6 +5,7 @@ calc_diversity: 计算一个小分子库的多样性
 理化性质计算
 predict_props: 计算一个小分子的各项理化性质，输入为小分子的smiles
 batch_props_pretty: 批量计算小分子的理化性质，输入为.smi文件
+batch_props_from_csv.py: 批量计算csv文件中小分子的理化性质，输入为.csv文件。需要定义输入和输出文件
 
 库条件筛选
 filter_library: 通过RDKit本身的计算，只保留一个小分子库中，满足制定条件的分子。输入为.csv文件
