@@ -13,7 +13,7 @@ filter_wOwnProp.py:有些下载下来的文件，本身就包含了计算好的�
 
 格式转换
 convert_csv_to_sdf: 把csv文件转换成mastro对接可用的sdf文件
-
+sdf_to_csv: 把sdf文件转换成csv文件，有时候sdf文件用maestro打开会出现错误。
 库查重，去重
 check_csv_duplicates: 检查一个库文件csv中的重复分子数，基于AI的分子生成会产生这种情况
 dedupe_with_counts:对库文件csv进行去重，并统计前10个最大重复的
